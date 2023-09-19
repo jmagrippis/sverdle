@@ -9,16 +9,21 @@ const config: PlaywrightTestConfig = {
 	retries: process.env.CI ? 2 : 0,
 	/* Opt out of parallel tests on CI. */
 	workers: process.env.CI ? 1 : undefined,
-	webServer: {
-		command: 'bun run build && bun run preview',
-		port: 4173,
-		reuseExistingServer: !process.env.CI,
-	},
+	webServer: process.env.CI
+		? {
+				command: 'bun --bun run build && bun --bun run preview',
+				port: 4173,
+		  }
+		: {
+				command: 'bun --bun run dev',
+				port: 5173,
+				reuseExistingServer: true,
+		  },
 	testDir: 'tests',
 	testMatch: /(.+\.)?(test|spec)\.[jt]s/,
 	use: {
 		/* Base URL to use in actions like `await page.goto('/')`. */
-		baseURL: 'http://localhost:4173',
+		baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
 
 		launchOptions: {
 			slowMo: parseInt(process.env.SLOW_MO || '0'),
